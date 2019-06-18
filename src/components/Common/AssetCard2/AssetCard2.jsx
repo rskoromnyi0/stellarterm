@@ -7,6 +7,7 @@ import Driver from '../../../lib/Driver';
 import Ellipsis from '../Ellipsis/Ellipsis';
 
 const images = require('../../../images');
+const logos = require('../../../../directory/logos');
 
 // This is AssetCard2, the preferred way of displaying an asset in stellarterm.
 // The parent container should be 340px or wider
@@ -39,7 +40,7 @@ export default class AssetCard2 extends React.Component {
         this._mounted = false;
     }
 
-    getDataFromLocalStorage(asset, anchor) {
+    getUnknownAssetDataFromLocalStorage(asset, anchor) {
         let name = 'load';
         let logo = 'load';
         const unknownAssetsData = JSON.parse(localStorage.getItem('unknownAssetsData')) || [];
@@ -66,6 +67,24 @@ export default class AssetCard2 extends React.Component {
             logoPadding,
             color,
         };
+    }
+
+    getKnownAssetDataFromLocalStorage(asset, anchor) {
+        const knownAssetsData = JSON.parse(localStorage.getItem('knownAssetsData')) || [];
+        if (!knownAssetsData.length && !this.props.d.session.addKnownAssetDataCalled) {
+            this.props.d.session.addKnownAssetDataPromise.then(() => this.forceUpdate());
+            return anchor;
+        }
+        const knownAsset = knownAssetsData.find(item => (
+            item.code === asset.code && item.issuer === asset.issuer
+        ));
+
+        if (!knownAsset) {
+            return anchor;
+        }
+
+        knownAsset.logoPadding = true;
+        return knownAsset;
     }
 
     async loadAssetData(asset) {
@@ -119,9 +138,11 @@ export default class AssetCard2 extends React.Component {
 
         const isUnknown = anchor.name === 'unknown';
 
-        let { logo, name } = isUnknown ? this.getDataFromLocalStorage(asset, anchor) : anchor;
+        let { name } = isUnknown ? this.getUnknownAssetDataFromLocalStorage(asset, anchor) : anchor;
+        let { logo, logoPadding } = isUnknown ?
+            this.getUnknownAssetDataFromLocalStorage(asset, anchor) :
+            this.getKnownAssetDataFromLocalStorage(asset, anchor);
         let color = isUnknown ? '#A5A0A7' : anchor.color;
-        let { logoPadding } = isUnknown ? this.getDataFromLocalStorage(asset, anchor) : false;
 
         if ((name === 'load' || logo === 'load') && this.state.loadedAssetData) {
             name = this.state.loadedAssetData.host || this.props.host || anchor.name;
@@ -150,6 +171,10 @@ export default class AssetCard2 extends React.Component {
                      <img
                          className="Row_logo"
                          src={logo === 'load' ? images['icon-circle-preloader-gif'] : logo}
+                         ref={(img) => { this.img = img; }}
+                         onError={() => {
+                             this.img.src = logos.unknown;
+                         }}
                          alt={anchor.name} />
                      {name === 'load' ?
                          <span>{asset.code} - <Ellipsis /></span> :
@@ -178,7 +203,7 @@ export default class AssetCard2 extends React.Component {
 }
 
 AssetCard2.propTypes = {
-    d: PropTypes.instanceOf(Driver),
+    d: PropTypes.instanceOf(Driver).isRequired,
     code: PropTypes.string.isRequired,
     boxy: PropTypes.bool,
     issuer: PropTypes.string,

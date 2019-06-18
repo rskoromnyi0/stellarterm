@@ -31,6 +31,7 @@ export default class AddTrustRow extends React.Component {
             <div className="AddTrustRow row">
                 <div className="row__assetCard2">
                     <AssetCard2
+                        d={this.props.d}
                         code={this.props.asset.getCode()}
                         issuer={this.props.asset.getIssuer()}
                         color={this.state.color}
