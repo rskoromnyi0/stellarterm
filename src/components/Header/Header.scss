@@ -68,3 +68,17 @@
         }
     }
 }
+
+.header_Sticky {
+    position: sticky;
+    top: 0;
+
+    .so-back {
+        padding-right: 0;
+        padding-left: 18px ;
+    }
+
+    .so-chunk {
+        max-width: 100%;
+    }
+}

@@ -7,9 +7,16 @@ import ManageOffers from './ManageOffers/ManageOffers';
 import OfferTables from './OfferTables/OfferTables';
 import OfferMakers from './OfferMakers/OfferMakers';
 import PairPicker from './PairPicker/PairPicker';
-import PriceChart from './PriceChart/PriceChart';
+import LightweightChart from './LightweightChart/LightweightChart';
 import Ellipsis from '../Common/Ellipsis/Ellipsis';
 import Generic from '../Common/Generic/Generic';
+import images from '../../images';
+import FullscreenKeyAlert from './FullscreenKeyAlert/FullscreenKeyAlert';
+import * as converterOHLC from './LightweightChart/ConverterOHLC';
+
+const BAR = 'barChart';
+const CANDLE = 'candlestickChart';
+const LINE = 'lineChart';
 
 export default class Exchange extends React.Component {
     constructor(props) {
@@ -20,18 +27,96 @@ export default class Exchange extends React.Component {
         this.unsubSession = this.props.d.session.event.sub(() => {
             this.forceUpdate();
         });
+
+        this.state = {
+            chartType: 'lineChart',
+            fullscreenMode: false,
+            timeFrame: converterOHLC.FRAME_HOUR,
+        };
+        this._handleKeyDown = this._handleKeyDown.bind(this);
     }
 
     componentWillMount() {
         window.scrollTo(0, 0);
     }
 
+    componentDidMount() {
+        document.addEventListener('keyup', this._handleKeyDown);
+    }
+
     componentWillUnmount() {
         this.unsub();
         this.unsubSession();
+        document.removeEventListener('keyup', this._handleKeyDown);
+
+        if (this.state.fullscreenMode) {
+            this.toggleFullScreen();
+        }
     }
 
-    checkOrderboorWarning() {
+    getChartSwitcherPanel() {
+        const { chartType, fullscreenMode } = this.state;
+
+        return (
+            <div className="island__header chart_Switcher">
+                <div className="switch_Tabs">
+                    <a
+                        onClick={() => this.setState({ chartType: 'lineChart' })}
+                        className={chartType === LINE ? 'activeChart' : ''}>
+                        Linechart
+                    </a>
+                    <a
+                        onClick={() => this.setState({ chartType: 'candlestickChart' })}
+                        className={chartType === CANDLE ? 'activeChart' : ''}>
+                        Candlestick
+                    </a>
+                    <a
+                        onClick={() => this.setState({ chartType: 'barChart' })}
+                        className={chartType === BAR ? 'activeChart' : ''}>
+                        Bar chart
+                    </a>
+                </div>
+                <div className="fullscreen_Block">
+                    {fullscreenMode ? (
+                        <img src={images['icon-fullscreen-minimize']} alt="F" onClick={() => this.toggleFullScreen()} />
+                    ) : (
+                        <img src={images['icon-fullscreen']} alt="F" onClick={() => this.toggleFullScreen()} />
+                    )}
+                </div>
+            </div>
+        );
+    }
+
+    toggleFullScreen() {
+        const { fullscreenMode } = this.state;
+        document.body.style.overflow = fullscreenMode ? 'auto' : 'hidden';
+        document.getElementById('stellarterm_header').classList.toggle('header_Sticky');
+
+        this.setState({
+            fullscreenMode: !fullscreenMode,
+        });
+    }
+
+    _handleKeyDown(e) {
+        const { fullscreenMode } = this.state;
+
+        if (this.props.d.orderbook.data.ready) {
+            switch (e.code) {
+            case 'Escape':
+                if (fullscreenMode) {
+                    this.toggleFullScreen();
+                }
+                break;
+            case 'KeyF':
+                this.toggleFullScreen();
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    checkOrderbookWarning() {
         const ticker = this.props.d.ticker;
         const data = this.props.d.orderbook.data;
 
@@ -80,7 +165,7 @@ export default class Exchange extends React.Component {
             );
         }
 
-        const thinOrderbookWarning = this.checkOrderboorWarning();
+        const thinOrderbookWarning = this.checkOrderbookWarning();
         const data = this.props.d.orderbook.data;
         let warningWarning;
 
@@ -104,12 +189,41 @@ export default class Exchange extends React.Component {
             offermakers = <OfferMakers d={this.props.d} />;
         }
 
+        const { chartType, fullscreenMode } = this.state;
+        const chartSwitcherPanel = this.getChartSwitcherPanel();
+
         return (
             <div>
                 <div className="so-back islandBack islandBack--t">
                     <PairPicker d={this.props.d} />
                 </div>
-                <PriceChart d={this.props.d} />
+                <div className="so-back islandBack">
+                    <div className={`island ChartChunk ${fullscreenMode ? 'fullScreenChart' : ''}`}>
+                        {chartSwitcherPanel}
+                        {fullscreenMode ? <FullscreenKeyAlert fullscreenMode={fullscreenMode} /> : null}
+                        {chartType === LINE ? (
+                            <LightweightChart
+                                d={this.props.d}
+                                lineChart
+                                timeFrame={this.state.timeFrame}
+                                onUpdate={timeFrame => this.setState({ timeFrame })} />
+                        ) : null}
+                        {chartType === CANDLE ? (
+                            <LightweightChart
+                                d={this.props.d}
+                                candlestickChart
+                                timeFrame={this.state.timeFrame}
+                                onUpdate={timeFrame => this.setState({ timeFrame })} />
+                        ) : null}
+                        {chartType === BAR ? (
+                            <LightweightChart
+                                d={this.props.d}
+                                barChart
+                                timeFrame={this.state.timeFrame}
+                                onUpdate={timeFrame => this.setState({ timeFrame })} />
+                        ) : null}
+                    </div>
+                </div>
                 <div className="so-back islandBack">
                     <div className="island Exchange__orderbook">
                         <div className="island__header">Orderbook</div>
