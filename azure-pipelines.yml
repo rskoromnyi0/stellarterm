@@ -23,7 +23,6 @@ steps:
     npm install -g
     npm run
     npm run producrion
-    npm run start
     npx mocha
     
     
