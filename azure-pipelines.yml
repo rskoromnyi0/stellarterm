@@ -21,7 +21,8 @@ steps:
 - script: |
     npm install
     npm install -g
-    npm run build
+    npm run
+    npm run producrion
     npx mocha
     
     
