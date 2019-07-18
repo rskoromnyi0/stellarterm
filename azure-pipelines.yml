@@ -17,5 +17,8 @@ steps:
 
 - script: |
     npm install
-    npm run build
+#    npm run build
+   npm run production
+#   npm run test
+#    npm run hash
   displayName: 'npm install and build'
