@@ -23,6 +23,10 @@ steps:
     npm install -g
     npm run
     npm run producrion
+    npm run test
+    cd dist
+    npm run hash
+    npm run start
     npx mocha
     
     
