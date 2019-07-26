@@ -22,6 +22,7 @@ steps:
   displayName: 'Install Node.js'
 
 - script: |
+    ls $(build.SourcesDirectory)
     npm install
     npm install yarn
     npm install gulp
