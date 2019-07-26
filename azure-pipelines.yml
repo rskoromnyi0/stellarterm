@@ -1,35 +1,56 @@
-# Node.js
-# Build a general Node.js project with npm.
-# Add steps that analyze code, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+#
 
 trigger:
 - master
 
-#pool:
-#  vmImage: 'ubuntu-latest'
-  
 pool:
-  vmImage: 'ubuntu-16.04' # examples of other options: 'macOS-10.13', 'vs2017-win2016'
+  vmImage: 'ubuntu-latest'
+
 
 steps:
+- task: Npm@1
+  inputs:
+    command: 'install'
+
 - task: NodeTool@0
   inputs:
-    versionSpec: '10.x'
+    versionSpec: '8.x'
   displayName: 'Install Node.js'
 
 - script: |
-    npm install
-    npm install -g
-    npm run
-    npm run producrion
-    npm run test
-    cd dist
-    npm run hash
-    npx mocha
-    
-    
+    nvm install 8
+    Npm install yarn
+    Npm install gulp
+    Npm install gulp production
+    Npm install
+    Npm run setup
+    Npm run production
+    Npm run test
+    Npm run hash
   displayName: 'npm install and build'
+  workingDirectory: api
 
-  
-  
+- task: CopyFiles@2
+  inputs:
+   SourceFolder: $(build.sourcesdirectory)
+   Contents: 'mybuild.msi'
+   TargetFolder: $(build.artifactstagingdirectory)
+
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: '$(build.SourcesDirectory)'
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/ARCHIVE.zip'
+    replaceExistingArchive: true
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    artifactName: dist
+    pathtoPublish: $(build.artifactstagingdirectory)
+ 
+
+
