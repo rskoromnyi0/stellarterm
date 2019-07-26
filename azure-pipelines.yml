@@ -31,7 +31,7 @@ steps:
     npm run test
     npm run hash
   displayName: 'npm install and build'
-  workingDirectory: api
+  #workingDirectory: api
 
 - task: CopyFiles@2
   inputs:
