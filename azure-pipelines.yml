@@ -22,10 +22,10 @@ steps:
   displayName: 'Install Node.js'
 
 - script: |
+    npm install
     npm install yarn
     npm install gulp
     npm install gulp production
-    npm install
     npm run setup
     npm run production
     npm run test
