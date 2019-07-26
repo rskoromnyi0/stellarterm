@@ -41,7 +41,7 @@ steps:
 
 - task: ArchiveFiles@2
   inputs:
-    rootFolderOrFile: '$(build.SourcesDirectory)'
+    rootFolderOrFile: '$(build.SourcesDirectory)/s/dist'
     archiveType: 'zip'
     archiveFile: '$(Build.ArtifactStagingDirectory)/ARCHIVE.zip'
     replaceExistingArchive: true
