@@ -22,15 +22,14 @@ steps:
   displayName: 'Install Node.js'
 
 - script: |
-    nvm install 8
-    Npm install yarn
-    Npm install gulp
-    Npm install gulp production
-    Npm install
-    Npm run setup
-    Npm run production
-    Npm run test
-    Npm run hash
+    npm install yarn
+    npm install gulp
+    npm install gulp production
+    npm install
+    npm run setup
+    npm run production
+    npm run test
+    npm run hash
   displayName: 'npm install and build'
   workingDirectory: api
 
