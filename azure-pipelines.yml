@@ -31,7 +31,6 @@ steps:
     npm run production
     npm run test
     npm run hash
-    ls $(build.SourcesDirectory)
   displayName: 'npm install and build'
   #workingDirectory: api
 
@@ -43,7 +42,7 @@ steps:
 
 - task: ArchiveFiles@2
   inputs:
-    rootFolderOrFile: '$(build.SourcesDirectory)/s/dist'
+    rootFolderOrFile: '$(build.SourcesDirectory)/dist'
     archiveType: 'zip'
     archiveFile: '$(Build.ArtifactStagingDirectory)/ARCHIVE.zip'
     replaceExistingArchive: true
